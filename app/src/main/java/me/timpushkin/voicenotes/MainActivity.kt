@@ -11,9 +11,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             VoiceNotesTheme {
-                MainScreen(recordingsViewModel)
+                MainScreen(
+                    recordingsViewModel = recordingsViewModel,
+                    onPlay = { TODO() },
+                    onRecord = { TODO() }
+                )
             }
         }
     }

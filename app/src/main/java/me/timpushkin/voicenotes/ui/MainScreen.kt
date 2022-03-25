@@ -13,7 +13,11 @@ import me.timpushkin.voicenotes.R
 import me.timpushkin.voicenotes.RecordingsViewModel
 
 @Composable
-fun MainScreen(recordingsViewModel: RecordingsViewModel) {
+fun MainScreen(
+    recordingsViewModel: RecordingsViewModel,
+    onPlay: (Long) -> Unit,
+    onRecord: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
@@ -27,6 +31,7 @@ fun MainScreen(recordingsViewModel: RecordingsViewModel) {
 
                 RecordingsList(
                     recordingsViewModel = recordingsViewModel,
+                    onElementClick = onPlay,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
@@ -34,7 +39,7 @@ fun MainScreen(recordingsViewModel: RecordingsViewModel) {
             }
 
             RecordButton(
-                onClick = { TODO() },
+                onClick = onRecord,
                 modifier = Modifier
                     .padding(20.dp)
                     .align(Alignment.BottomCenter)

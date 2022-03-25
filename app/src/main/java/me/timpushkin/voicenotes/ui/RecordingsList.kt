@@ -9,7 +9,11 @@ import androidx.compose.ui.unit.dp
 import me.timpushkin.voicenotes.RecordingsViewModel
 
 @Composable
-fun RecordingsList(recordingsViewModel: RecordingsViewModel, modifier: Modifier = Modifier) {
+fun RecordingsList(
+    recordingsViewModel: RecordingsViewModel,
+    onElementClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val recordings = recordingsViewModel.recordings
 
     LazyColumn(
@@ -21,7 +25,7 @@ fun RecordingsList(recordingsViewModel: RecordingsViewModel, modifier: Modifier 
                 title = recording.title,
                 timestamp = recording.timestamp,
                 durationSec = recording.duration,
-                onClick = { TODO() }
+                onClick = { onElementClick(recording.id) }
             )
         }
     }
