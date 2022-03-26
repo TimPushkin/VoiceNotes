@@ -2,6 +2,7 @@ package me.timpushkin.voicenotes
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +19,8 @@ private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
     private lateinit var applicationState: ApplicationState
     private lateinit var storageHandler: StorageHandler
+
+    private var currentRecording: Uri? = null
 
     private val permissionsRequester =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -39,8 +42,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        applicationState = ApplicationState()
-        storageHandler = StorageHandler(contentResolver)
+        storageHandler = StorageHandler(
+            contentResolver,
+            packageManager.getApplicationLabel(applicationInfo).toString()
+        )
+        applicationState = ApplicationState().apply {
+            setRecordingsWith(storageHandler::getRecordings)
+        }
 
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
@@ -68,8 +76,11 @@ class MainActivity : ComponentActivity() {
         if (recordPermission == PermissionStatus.GRANTED && writePermission == PermissionStatus.GRANTED) {
             Log.d(TAG, "All permissions are granted, starting recording")
 
-            storageHandler.createAudioFile()?.let { fd ->
-                applicationState.startRecording(this, fd)
+            storageHandler.createRecording()?.let { uri ->
+                currentRecording = uri
+                storageHandler.uriToFileDescriptor(uri)?.let { fd ->
+                    applicationState.startRecording(this, fd)
+                }
             }
 
             return
@@ -107,8 +118,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun stopRecording() {
-        Log.d(TAG, "Stopping recording")
-        applicationState.stopRecording()
+        currentRecording?.let { uri ->
+            Log.d(TAG, "Stopping recording")
+            applicationState.stopRecording()
+            storageHandler.setMetadataFor(uri)
+            applicationState.setRecordingsWith(storageHandler::getRecordings)
+        } ?: run { Log.e(TAG, "Attempted to stop recording when current recording isn't set") }
     }
 
     private fun checkPermission(permission: String, maxVersion: Int = Int.MAX_VALUE) = when {

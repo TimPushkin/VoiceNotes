@@ -1,5 +1,6 @@
 package me.timpushkin.voicenotes.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -15,7 +16,7 @@ import me.timpushkin.voicenotes.R
 @Composable
 fun MainScreen(
     applicationState: ApplicationState,
-    onPlay: (Long) -> Unit,
+    onPlay: (Uri) -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit
 ) {

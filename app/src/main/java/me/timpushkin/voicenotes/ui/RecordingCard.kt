@@ -16,7 +16,7 @@ import me.timpushkin.voicenotes.R
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 
 @Composable
-fun RecordingCard(title: String, timestamp: Long, durationSec: Long, onClick: (Boolean) -> Unit) {
+fun RecordingCard(name: String, date: Long, duration: Long, onClick: (Boolean) -> Unit) {
     var isPlaying by remember { mutableStateOf(false) }
 
     Surface(
@@ -28,7 +28,7 @@ fun RecordingCard(title: String, timestamp: Long, durationSec: Long, onClick: (B
         ) {
             Column {
                 Text(
-                    text = title,
+                    text = name,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.h6
@@ -37,7 +37,7 @@ fun RecordingCard(title: String, timestamp: Long, durationSec: Long, onClick: (B
                 Text(
                     text = DateUtils.formatDateTime(
                         LocalContext.current,
-                        timestamp,
+                        date,
                         DateUtils.FORMAT_SHOW_DATE and DateUtils.FORMAT_SHOW_TIME
                     ),
                     maxLines = 1,
@@ -50,7 +50,7 @@ fun RecordingCard(title: String, timestamp: Long, durationSec: Long, onClick: (B
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = DateUtils.formatElapsedTime(durationSec),
+                    text = DateUtils.formatElapsedTime(duration),
                     maxLines = 1,
                     style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
                 )
@@ -87,6 +87,6 @@ fun RecordingCard(title: String, timestamp: Long, durationSec: Long, onClick: (B
 @Composable
 fun RecordingCardPreview() {
     VoiceNotesTheme {
-        RecordingCard(title = "Title", timestamp = 9999999999999, durationSec = 10000, onClick = {})
+        RecordingCard(name = "Title", date = 9999999999999, duration = 10000, onClick = {})
     }
 }
