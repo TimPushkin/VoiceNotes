@@ -9,11 +9,6 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarResult
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import me.timpushkin.voicenotes.ui.MainScreen
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 import me.timpushkin.voicenotes.utils.StorageHandler
@@ -32,9 +27,13 @@ class MainActivity : ComponentActivity() {
                 checkPermission(Manifest.permission.RECORD_AUDIO) == PermissionStatus.GRANTED
             }
             val writeGranted = permissions.getOrElse(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-                checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionStatus.GRANTED
+                checkPermission(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Build.VERSION_CODES.P
+                ) == PermissionStatus.GRANTED
             }
             if (recordGranted && writeGranted) startRecording()
+            else applicationState.showSnackbar(resources.getString(R.string.no_permissions))
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,33 +42,23 @@ class MainActivity : ComponentActivity() {
         applicationState = ApplicationState()
         storageHandler = StorageHandler(contentResolver)
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+
         setContent {
-            val snackbarState = remember { SnackbarHostState() }
-            val scope = rememberCoroutineScope()
-
             VoiceNotesTheme {
-
                 MainScreen(
                     applicationState = applicationState,
                     onPlay = { TODO() },
-                    onStartRecording = {
-                        startRecording { permissions, rationales ->
-                            scope.launch {
-                                if (snackbarState.showSnackbar(
-                                        message = rationales.joinToString("\n"),
-                                        actionLabel = resources.getString(R.string.grant)
-                                    ) == SnackbarResult.ActionPerformed
-                                ) permissionsRequester.launch(permissions)
-                            }
-                        }
-                    },
+                    onStartRecording = this::startRecording,
                     onStopRecording = this::stopRecording
                 )
             }
         }
     }
 
-    private fun startRecording(showRationales: (Array<String>, List<String>) -> Unit = { _, _ -> }) {
+    private fun startRecording() {
+        Log.d(TAG, "Attempting to start recording")
+
         val recordPermission = checkPermission(Manifest.permission.RECORD_AUDIO)
         val writePermission = checkPermission(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -100,7 +89,11 @@ class MainActivity : ComponentActivity() {
         }
         if (permissionsToRationalize.isNotEmpty()) {
             Log.d(TAG, "Showing rationales for $permissionsToRationalize")
-            showRationales(permissionsToRationalize.toTypedArray(), rationales)
+            applicationState.showSnackbar(
+                message = rationales.joinToString("\n"),
+                label = resources.getString(R.string.grant),
+                action = { permissionsRequester.launch(permissionsToRationalize.toTypedArray()) }
+            )
         }
 
         val permissionsToRequest = mutableListOf<String>().apply {
