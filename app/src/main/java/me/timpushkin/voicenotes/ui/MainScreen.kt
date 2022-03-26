@@ -9,14 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import me.timpushkin.voicenotes.ApplicationState
 import me.timpushkin.voicenotes.R
-import me.timpushkin.voicenotes.RecordingsViewModel
 
 @Composable
 fun MainScreen(
-    recordingsViewModel: RecordingsViewModel,
+    applicationState: ApplicationState,
     onPlay: (Long) -> Unit,
-    onRecord: () -> Unit
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -30,7 +31,7 @@ fun MainScreen(
                 )
 
                 RecordingsList(
-                    recordingsViewModel = recordingsViewModel,
+                    recordings = applicationState.recordings,
                     onElementClick = onPlay,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -39,7 +40,11 @@ fun MainScreen(
             }
 
             RecordButton(
-                onClick = onRecord,
+                isRecording = applicationState.isRecording,
+                onClick = {
+                    if (applicationState.isRecording) onStopRecording()
+                    else onStartRecording()
+                },
                 modifier = Modifier
                     .padding(20.dp)
                     .align(Alignment.BottomCenter)

@@ -6,16 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.timpushkin.voicenotes.RecordingsViewModel
+import me.timpushkin.voicenotes.models.Recording
 
 @Composable
 fun RecordingsList(
-    recordingsViewModel: RecordingsViewModel,
+    recordings: List<Recording>,
     onElementClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val recordings = recordingsViewModel.recordings
-
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(10.dp)

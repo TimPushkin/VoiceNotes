@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">VoiceNotes</string>
     <string name="your_recordings">Your recordings</string>
+    <string name="audio_recording_rationale">Audio recording is impossible without the corresponding permission granted. The records will only be stored locally on this device.</string>
+    <string name="storage_writing_rationale">Records are saved on the storage of this device. Thus recording cannot be started without storage writing permission.</string>
+    <string name="grant">Grant</string>
 </resources>

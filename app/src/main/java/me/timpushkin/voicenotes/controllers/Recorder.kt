@@ -3,19 +3,25 @@ package me.timpushkin.voicenotes.controllers
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import android.system.Os
 import android.util.Log
 import java.io.FileDescriptor
 
 private const val TAG = "Recorder"
 
-class Recorder(private val context: Context) {
-    private lateinit var mediaRecorder: MediaRecorder
+class Recorder {
+    private var mediaRecorder: MediaRecorder? = null
+    private var fileDescriptor: FileDescriptor? = null
 
-    fun start(fd: FileDescriptor): Boolean {
-        mediaRecorder = getMediaRecorder().apply {
+    fun start(context: Context, output: FileDescriptor): Boolean {
+        Log.d(TAG, "Starting recording to $output")
+
+        fileDescriptor = output
+
+        mediaRecorder = getMediaRecorder(context).apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-            setOutputFile(fd)
+            setOutputFile(fileDescriptor)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
             try {
                 prepare()
@@ -27,30 +33,34 @@ class Recorder(private val context: Context) {
             start()
         }
 
-        Log.i(TAG, "Started recording to $fd")
+        Log.i(TAG, "Started recording to $fileDescriptor")
 
         return true
     }
 
     fun stop() {
-        if (!this::mediaRecorder.isInitialized) {
-            Log.e(TAG, "Called stop() when mediaRecorded is uninitialized")
-            return
-        }
+        Log.d(TAG, "Stopping recording to $fileDescriptor")
 
-        mediaRecorder.run {
+        mediaRecorder?.run {
             try {
                 stop()
             } catch (e: IllegalStateException) {
                 Log.e(TAG, "Called stop() before calling start()")
             }
             release()
+        } ?: run {
+            Log.e(TAG, "Called stop() when mediaRecorded is uninitialized")
+            return
         }
+
+        Os.close(fileDescriptor)
+        mediaRecorder = null
+        fileDescriptor = null
 
         Log.i(TAG, "Finished recording")
     }
 
-    private fun getMediaRecorder() =
+    private fun getMediaRecorder(context: Context) =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context)
         else MediaRecorder()
 }

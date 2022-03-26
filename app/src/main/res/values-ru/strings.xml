@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">VoiceNotes</string>
     <string name="your_recordings">Ваши записи</string>
+    <string name="audio_recording_rationale">Запись аудио невозможно без соответствующего разрешения. Записи хранятся только локально на устройстве.</string>
+    <string name="storage_writing_rationale">Записи сохраняются в память устройства, поэтому запись не может быть начата без разрешения на запись в память.</string>
+    <string name="grant">Разрешить</string>
 </resources>
