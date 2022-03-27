@@ -16,6 +16,11 @@ class Recorder {
     fun start(context: Context, output: FileDescriptor): Boolean {
         Log.d(TAG, "Starting recording to $output")
 
+        if (mediaRecorder != null) {
+            Log.w(TAG, "Previous recording was not stopped. Stopping...")
+            stop()
+        }
+
         fileDescriptor = output
 
         mediaRecorder = getMediaRecorder(context).apply {
@@ -26,7 +31,7 @@ class Recorder {
             try {
                 prepare()
             } catch (e: java.io.IOException) {
-                Log.e(TAG, "Failed to prepare a mediaRecorder")
+                Log.e(TAG, "Failed to prepare MediaRecorder")
                 release()
                 return false
             }
@@ -49,7 +54,7 @@ class Recorder {
             }
             release()
         } ?: run {
-            Log.e(TAG, "Called stop() when mediaRecorded is uninitialized")
+            Log.w(TAG, "Called stop() when MediaRecorded is not set")
             return
         }
 

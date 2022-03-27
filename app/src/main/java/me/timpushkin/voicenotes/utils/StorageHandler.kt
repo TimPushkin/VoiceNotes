@@ -49,12 +49,18 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String = 
         return uri
     }
 
-    fun uriToFileDescriptor(uri: Uri): FileDescriptor? {
-        val fd = resolver.openFileDescriptor(uri, "w")
+    fun uriToFileDescriptor(uri: Uri, mode: Mode): FileDescriptor? {
+        val modeStr = when (mode) {
+            Mode.READ -> "r"
+            Mode.WRITE -> "w"
+        }
+        val fd = resolver.openFileDescriptor(uri, modeStr)
         if (fd == null) Log.e(TAG, "Failed to obtain a file descriptor for the created file")
         else Log.d(TAG, "Created file descriptor $fd for Uri $uri")
         return fd?.fileDescriptor
     }
+
+    enum class Mode { READ, WRITE }
 
     fun setMetadataFor(uri: Uri) {
         val metadata = ContentValues().apply {

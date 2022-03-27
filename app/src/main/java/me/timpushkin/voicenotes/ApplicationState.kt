@@ -1,19 +1,26 @@
 package me.timpushkin.voicenotes
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import me.timpushkin.voicenotes.controllers.Player
 import me.timpushkin.voicenotes.controllers.Recorder
 import me.timpushkin.voicenotes.models.Recording
 import me.timpushkin.voicenotes.models.SnackbarContent
 import java.io.FileDescriptor
 
 class ApplicationState : ViewModel() {
+    private val player = Player()
     private val recorder = Recorder()
+
+    private var _nowPlaying by mutableStateOf<Uri?>(null)
+    val nowPlaying: Uri?
+        get() = _nowPlaying
 
     private var _isRecording by mutableStateOf(false)
     val isRecording: Boolean
@@ -29,6 +36,15 @@ class ApplicationState : ViewModel() {
 
     fun setRecordingsWith(getRecordings: () -> List<Recording>) {
         viewModelScope.launch { _recordings = getRecordings() }
+    }
+
+    fun startPlaying(recordingUri: Uri, fd: FileDescriptor) {
+        player.start(fd) { _nowPlaying = recordingUri }
+    }
+
+    fun stopPlaying() {
+        player.stop()
+        _nowPlaying = null
     }
 
     fun startRecording(context: Context, fd: FileDescriptor) {

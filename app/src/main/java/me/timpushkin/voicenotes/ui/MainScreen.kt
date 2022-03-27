@@ -17,6 +17,7 @@ import me.timpushkin.voicenotes.R
 fun MainScreen(
     applicationState: ApplicationState,
     onPlay: (Uri) -> Unit,
+    onPause: (Uri) -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit
 ) {
@@ -50,7 +51,10 @@ fun MainScreen(
 
             RecordingsList(
                 recordings = applicationState.recordings,
-                onElementClick = onPlay,
+                onElementClick = { uri ->
+                    if (applicationState.nowPlaying == uri) onPause(uri)
+                    else onPlay(uri)
+                },
                 modifier = Modifier
                     .padding(top = 10.dp)
                     .fillMaxWidth()

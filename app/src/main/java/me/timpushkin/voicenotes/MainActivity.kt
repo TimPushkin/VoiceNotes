@@ -56,12 +56,23 @@ class MainActivity : ComponentActivity() {
             VoiceNotesTheme {
                 MainScreen(
                     applicationState = applicationState,
-                    onPlay = { TODO() },
+                    onPlay = this::startPlaying,
+                    onPause = this::stopPlaying,
                     onStartRecording = this::startRecording,
                     onStopRecording = this::stopRecording
                 )
             }
         }
+    }
+
+    private fun startPlaying(recording: Uri) {
+        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.READ)?.let { fd ->
+            applicationState.startPlaying(recording, fd)
+        }
+    }
+
+    private fun stopPlaying(recording: Uri) {
+        applicationState.stopPlaying()
     }
 
     private fun startRecording() {
@@ -78,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
             storageHandler.createRecording()?.let { uri ->
                 currentRecording = uri
-                storageHandler.uriToFileDescriptor(uri)?.let { fd ->
+                storageHandler.uriToFileDescriptor(uri, StorageHandler.Mode.WRITE)?.let { fd ->
                     applicationState.startRecording(this, fd)
                 }
             }
