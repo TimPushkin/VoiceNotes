@@ -1,7 +1,8 @@
 package me.timpushkin.voicenotes.ui
 
 import android.net.Uri
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -16,14 +17,16 @@ fun RecordingsList(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(10.dp)
+        modifier = modifier
     ) {
         items(recordings) { recording ->
             RecordingCard(
                 name = recording.name,
                 date = recording.date,
                 duration = recording.duration,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
                 onClick = { onElementClick(recording.uri) }
             )
         }

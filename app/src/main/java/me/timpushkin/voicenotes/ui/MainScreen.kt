@@ -52,6 +52,7 @@ fun MainScreen(
                 recordings = applicationState.recordings,
                 onElementClick = onPlay,
                 modifier = Modifier
+                    .padding(top = 10.dp)
                     .fillMaxWidth()
             )
         }

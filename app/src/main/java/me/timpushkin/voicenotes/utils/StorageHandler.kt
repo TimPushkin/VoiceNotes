@@ -19,7 +19,7 @@ private const val TAG = "StorageHandler"
 private const val FILE_EXTENSION = ".aac"
 
 class StorageHandler(private val resolver: ContentResolver, subfolder: String = "") {
-    private val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.ENGLISH)
+    private val formatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
     private val calendar = Calendar.getInstance()
 
     private val collection =
@@ -92,8 +92,8 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String = 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
                 val name = cursor.getString(nameColumn)
-                val date = cursor.getLong(dateColumn)
-                val duration = cursor.getLong(durationColumn)
+                val date = cursor.getLong(dateColumn) * 1000
+                val duration = cursor.getLong(durationColumn) / 1000
 
                 val uri = ContentUris.withAppendedId(collection, id)
 

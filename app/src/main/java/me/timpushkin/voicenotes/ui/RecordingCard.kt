@@ -16,17 +16,25 @@ import me.timpushkin.voicenotes.R
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 
 @Composable
-fun RecordingCard(name: String, date: Long, duration: Long, onClick: (Boolean) -> Unit) {
+fun RecordingCard(
+    name: String,
+    date: Long,
+    duration: Long,
+    modifier: Modifier = Modifier,
+    onClick: (Boolean) -> Unit
+) {
     var isPlaying by remember { mutableStateOf(false) }
 
-    Surface(
-        shape = MaterialTheme.shapes.medium
+    Card(
+        modifier = modifier,
+        elevation = 0.dp
     ) {
         Row(
             modifier = Modifier.padding(10.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.fillMaxWidth(0.65f)) {
                 Text(
                     text = name,
                     overflow = TextOverflow.Ellipsis,
@@ -38,7 +46,7 @@ fun RecordingCard(name: String, date: Long, duration: Long, onClick: (Boolean) -
                     text = DateUtils.formatDateTime(
                         LocalContext.current,
                         date,
-                        DateUtils.FORMAT_SHOW_DATE and DateUtils.FORMAT_SHOW_TIME
+                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME
                     ),
                     maxLines = 1,
                     style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
@@ -58,12 +66,15 @@ fun RecordingCard(name: String, date: Long, duration: Long, onClick: (Boolean) -
 
             Button(
                 onClick = { onClick(isPlaying.also { isPlaying = !isPlaying }) },
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier
+                    .size(35.dp)
+                    .requiredSize(35.dp),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = if (isPlaying) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
                     contentColor = MaterialTheme.colors.surface
-                )
+                ),
+                contentPadding = PaddingValues(0.dp)
             ) {
                 if (isPlaying) {
                     Icon(
