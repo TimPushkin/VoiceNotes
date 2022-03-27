@@ -66,12 +66,16 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startPlaying(recording: Uri) {
+        if (applicationState.isRecording) stopRecording()
+
         storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.READ)?.let { fd ->
-            applicationState.startPlaying(recording, fd)
+            applicationState.startPlaying(recording, fd) {
+                applicationState.showSnackbar(resources.getString(R.string.play_failed))
+            }
         }
     }
 
-    private fun stopPlaying(recording: Uri) {
+    private fun stopPlaying() {
         applicationState.stopPlaying()
     }
 
@@ -87,10 +91,14 @@ class MainActivity : ComponentActivity() {
         if (recordPermission == PermissionStatus.GRANTED && writePermission == PermissionStatus.GRANTED) {
             Log.d(TAG, "All permissions are granted, starting recording")
 
+            if (applicationState.nowPlaying != null) stopPlaying()
+
             storageHandler.createRecording()?.let { uri ->
                 currentRecording = uri
                 storageHandler.uriToFileDescriptor(uri, StorageHandler.Mode.WRITE)?.let { fd ->
-                    applicationState.startRecording(this, fd)
+                    applicationState.startRecording(this, fd) {
+                        applicationState.showSnackbar(resources.getString(R.string.record_failed))
+                    }
                 }
             }
 

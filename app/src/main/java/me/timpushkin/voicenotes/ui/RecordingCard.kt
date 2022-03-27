@@ -20,11 +20,10 @@ fun RecordingCard(
     name: String,
     date: Long,
     duration: Long,
+    isPlaying: Boolean,
     modifier: Modifier = Modifier,
-    onClick: (Boolean) -> Unit
+    onClick: () -> Unit
 ) {
-    var isPlaying by remember { mutableStateOf(false) }
-
     Card(
         modifier = modifier,
         elevation = 0.dp
@@ -65,7 +64,7 @@ fun RecordingCard(
             }
 
             Button(
-                onClick = { onClick(isPlaying.also { isPlaying = !isPlaying }) },
+                onClick = onClick,
                 modifier = Modifier
                     .size(35.dp)
                     .requiredSize(35.dp),
@@ -98,6 +97,11 @@ fun RecordingCard(
 @Composable
 fun RecordingCardPreview() {
     VoiceNotesTheme {
-        RecordingCard(name = "Title", date = 9999999999999, duration = 10000, onClick = {})
+        RecordingCard(
+            name = "Title",
+            date = 9999999999999,
+            isPlaying = false,
+            duration = 10000,
+            onClick = {})
     }
 }

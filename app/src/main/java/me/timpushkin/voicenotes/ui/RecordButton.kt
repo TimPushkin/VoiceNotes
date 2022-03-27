@@ -3,7 +3,6 @@ package me.timpushkin.voicenotes.ui
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -15,7 +14,8 @@ import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 fun RecordButton(isRecording: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     FloatingActionButton(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
+        backgroundColor = MaterialTheme.colors.primary
     ) {
         if (isRecording) {
             Icon(

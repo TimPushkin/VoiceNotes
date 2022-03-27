@@ -13,6 +13,7 @@ import me.timpushkin.voicenotes.models.Recording
 @Composable
 fun RecordingsList(
     recordings: List<Recording>,
+    nowPlaying: Uri?,
     onElementClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -24,6 +25,7 @@ fun RecordingsList(
                 name = recording.name,
                 date = recording.date,
                 duration = recording.duration,
+                isPlaying = recording.uri == nowPlaying,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),

@@ -12,13 +12,23 @@ class Player {
     private var mediaPlayer: MediaPlayer? = null
     private var fileDescriptor: FileDescriptor? = null
 
-    fun start(input: FileDescriptor, onStarted: () -> Unit = {}) {
+    fun start(
+        input: FileDescriptor,
+        onStarted: () -> Unit = {},
+        onCompleted: () -> Unit = {},
+        onError: () -> Unit = {}
+    ) {
         Log.d(TAG, "Starting playing from $input")
 
         fileDescriptor = input
 
         val cleanMediaPlayer = mediaPlayer?.apply { reset() } ?: MediaPlayer()
         cleanMediaPlayer.apply {
+            setOnErrorListener { _, _, _ ->
+                stop()
+                onError()
+                true
+            }
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -31,6 +41,7 @@ class Player {
                 Log.i(TAG, "Started playing from $input")
                 onStarted()
             }
+            setOnCompletionListener { onCompleted() }
             Log.d(TAG, "Preparing to play from $input")
             prepareAsync()
         }

@@ -103,7 +103,7 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String = 
 
                 val uri = ContentUris.withAppendedId(collection, id)
 
-                recordings += Recording(name, date, duration, uri)
+                recordings += Recording(name.substringBeforeLast('.'), date, duration, uri)
             }
         }
 

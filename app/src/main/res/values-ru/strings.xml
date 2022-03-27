@@ -6,4 +6,6 @@
     <string name="storage_writing_rationale">Записи сохраняются в память устройства, поэтому запись не может быть начата без разрешения на запись в память.</string>
     <string name="grant">Разрешить</string>
     <string name="no_permissions">Нет разрешений, необходимых для записи и хранения аудио. Пройдите в Настройки и дайте ранее отозванные разрешения.</string>
+    <string name="play_failed">Невозможно воспроизвести запись</string>
+    <string name="record_failed">Не удалось начать запись</string>
 </resources>

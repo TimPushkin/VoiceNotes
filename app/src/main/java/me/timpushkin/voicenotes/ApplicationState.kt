@@ -38,8 +38,16 @@ class ApplicationState : ViewModel() {
         viewModelScope.launch { _recordings = getRecordings() }
     }
 
-    fun startPlaying(recordingUri: Uri, fd: FileDescriptor) {
-        player.start(fd) { _nowPlaying = recordingUri }
+    fun startPlaying(recordingUri: Uri, fd: FileDescriptor, onError: () -> Unit = {}) {
+        player.start(
+            input = fd,
+            onStarted = { _nowPlaying = recordingUri },
+            onCompleted = { _nowPlaying = null },
+            onError = {
+                _nowPlaying = null
+                onError()
+            }
+        )
     }
 
     fun stopPlaying() {
@@ -47,8 +55,10 @@ class ApplicationState : ViewModel() {
         _nowPlaying = null
     }
 
-    fun startRecording(context: Context, fd: FileDescriptor) {
-        _isRecording = recorder.start(context, fd)
+    fun startRecording(context: Context, fd: FileDescriptor, onError: () -> Unit = {}) {
+        val started = recorder.start(context, fd)
+        _isRecording = started
+        if (!started) onError()
     }
 
     fun stopRecording() {
