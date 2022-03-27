@@ -139,9 +139,10 @@ class MainActivity : ComponentActivity() {
     private fun stopRecording() {
         currentRecording?.let { uri ->
             Log.d(TAG, "Stopping recording")
-            applicationState.stopRecording()
-            storageHandler.setMetadataFor(uri)
-            applicationState.setRecordingsWith(storageHandler::getRecordings)
+            if (applicationState.stopRecording()) {
+                storageHandler.setMetadataFor(uri)
+                applicationState.setRecordingsWith(storageHandler::getRecordings)
+            } else storageHandler.deleteRecording(uri)
         } ?: run { Log.e(TAG, "Attempted to stop recording when current recording isn't set") }
     }
 

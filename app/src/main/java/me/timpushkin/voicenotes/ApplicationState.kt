@@ -92,9 +92,8 @@ class ApplicationState : ViewModel() {
         if (!started) onError()
     }
 
-    fun stopRecording() {
-        recorder.stop()
-        _isRecording = false
+    fun stopRecording(): Boolean {
+        return recorder.stop().also { _isRecording = false }
     }
 
     fun showSnackbar(message: String, label: String? = null, action: () -> Unit = {}) {

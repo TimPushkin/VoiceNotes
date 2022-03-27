@@ -3,6 +3,7 @@ package me.timpushkin.voicenotes.controllers
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import android.system.ErrnoException
 import android.system.Os
 import android.util.Log
 import java.io.FileDescriptor
@@ -43,26 +44,33 @@ class Recorder {
         return true
     }
 
-    fun stop() {
+    fun stop(): Boolean {
         Log.d(TAG, "Stopping recording to $fileDescriptor")
 
         mediaRecorder?.run {
             try {
                 stop()
             } catch (e: IllegalStateException) {
-                Log.e(TAG, "Called stop() before calling start()")
+                Log.e(TAG, "Failed to stop MediaRecorder", e)
             }
             release()
         } ?: run {
             Log.w(TAG, "Called stop() when MediaRecorded is not set")
-            return
+            return false
         }
 
-        Os.close(fileDescriptor)
+        try {
+            Os.close(fileDescriptor)
+        } catch (e: ErrnoException) {
+            Log.e(TAG, "Failed to close $fileDescriptor", e)
+        }
+
         mediaRecorder = null
         fileDescriptor = null
 
         Log.i(TAG, "Finished recording")
+
+        return true
     }
 
     private fun getMediaRecorder(context: Context) =

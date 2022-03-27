@@ -2,6 +2,7 @@ package me.timpushkin.voicenotes.controllers
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.system.ErrnoException
 import android.system.Os
 import android.util.Log
 import java.io.FileDescriptor
@@ -71,7 +72,7 @@ class Player {
             try {
                 stop()
             } catch (e: IllegalStateException) {
-                Log.e(TAG, "Called stop() before calling start()")
+                Log.e(TAG, "Failed to stop MediaPlayer", e)
             }
             release()
         } ?: run {
@@ -79,7 +80,12 @@ class Player {
             return
         }
 
-        Os.close(fileDescriptor)
+        try {
+            Os.close(fileDescriptor)
+        } catch (e: ErrnoException) {
+            Log.e(TAG, "Failed to close $fileDescriptor", e)
+        }
+
         mediaPlayer = null
         fileDescriptor = null
 

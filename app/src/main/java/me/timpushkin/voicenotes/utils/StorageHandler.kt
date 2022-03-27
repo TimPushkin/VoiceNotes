@@ -72,6 +72,12 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String = 
         else Log.e(TAG, "Failed to set metadata for $uri")
     }
 
+    fun deleteRecording(uri: Uri) {
+        if (resolver.delete(uri, null, null) == 1)
+            Log.d(TAG, "Successfully deleted $uri")
+        else Log.e(TAG, "Failed to delete $uri")
+    }
+
     fun getRecordings(): List<Recording> {
         val recordings = mutableListOf<Recording>()
 
