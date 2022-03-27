@@ -19,89 +19,138 @@ import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 fun RecordingCard(
     name: String,
     date: Long,
-    duration: Long,
+    duration: Int,
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    played: Int = 0,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier,
         elevation = 0.dp
     ) {
-        Row(
-            modifier = Modifier.padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.fillMaxWidth(0.65f)) {
-                Text(
-                    text = name,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.h6
-                )
-
-                Text(
-                    text = DateUtils.formatDateTime(
-                        LocalContext.current,
-                        date,
-                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME
-                    ),
-                    maxLines = 1,
-                    style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
-                )
-            }
-
+        Box(modifier = Modifier.fillMaxWidth()) {
             Row(
-                modifier = Modifier.padding(10.dp),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = DateUtils.formatElapsedTime(duration),
-                    maxLines = 1,
-                    style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
-                )
+                RecordingTextInfo(name, date)
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                RecordingTimeInfo(duration, played)
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                PlayButton(isPlaying, onClick)
             }
 
-            Button(
-                onClick = onClick,
-                modifier = Modifier
-                    .size(35.dp)
-                    .requiredSize(35.dp),
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (isPlaying) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.surface
-                ),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                if (isPlaying) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_round_pause_24),
-                        contentDescription = "Pause",
-                        tint = MaterialTheme.colors.surface
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_round_play_arrow_24),
-                        contentDescription = "Play",
-                        tint = MaterialTheme.colors.surface
-                    )
-                }
+            if (isPlaying) {
+                LinearProgressIndicator(
+                    progress = played.toFloat() / duration,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    backgroundColor = MaterialTheme.colors.surface
+                )
             }
+        }
+    }
+}
+
+@Composable
+fun RecordingTextInfo(name: String, date: Long) {
+    Column(modifier = Modifier.fillMaxWidth(0.65f)) {
+        Text(
+            text = name,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            style = MaterialTheme.typography.h6
+        )
+
+        Text(
+            text = DateUtils.formatDateTime(
+                LocalContext.current,
+                date,
+                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME
+            ),
+            maxLines = 1,
+            style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
+        )
+    }
+}
+
+@Composable
+fun RecordingTimeInfo(duration: Int, played: Int) {
+    val durationStr = DateUtils.formatElapsedTime(duration.toLong() / 1000)
+    val text =
+        if (played > 0) "${DateUtils.formatElapsedTime(played.toLong() / 1000)} / $durationStr"
+        else durationStr
+
+    Text(
+        text = text,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
+    )
+}
+
+@Composable
+fun PlayButton(isPlaying: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .size(35.dp)
+            .requiredSize(35.dp),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isPlaying) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.surface
+        ),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        if (isPlaying) {
+            Icon(
+                painter = painterResource(R.drawable.ic_round_pause_24),
+                contentDescription = "Pause",
+                tint = MaterialTheme.colors.surface
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_round_play_arrow_24),
+                contentDescription = "Play",
+                tint = MaterialTheme.colors.surface
+            )
         }
     }
 }
 
 @Preview
 @Composable
-fun RecordingCardPreview() {
+fun RecordingCardWhenNotPlayingPreview() {
     VoiceNotesTheme {
         RecordingCard(
             name = "Title",
             date = 9999999999999,
             isPlaying = false,
+            duration = 10000
+        )
+    }
+}
+
+@Preview
+@Composable
+fun RecordingCardWhenPlayingPreview() {
+    VoiceNotesTheme {
+        RecordingCard(
+            name = "Title",
+            date = 9999999999999,
             duration = 10000,
-            onClick = {})
+            isPlaying = true,
+            played = 7000
+        )
     }
 }

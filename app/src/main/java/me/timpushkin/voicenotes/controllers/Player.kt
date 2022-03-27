@@ -12,6 +12,9 @@ class Player {
     private var mediaPlayer: MediaPlayer? = null
     private var fileDescriptor: FileDescriptor? = null
 
+    val position: Int
+        get() = mediaPlayer?.currentPosition ?: 0
+
     fun start(
         input: FileDescriptor,
         onStarted: () -> Unit = {},

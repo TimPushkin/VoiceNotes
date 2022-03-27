@@ -99,7 +99,7 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String = 
                 val id = cursor.getLong(idColumn)
                 val name = cursor.getString(nameColumn)
                 val date = cursor.getLong(dateColumn) * 1000
-                val duration = cursor.getLong(durationColumn) / 1000
+                val duration = cursor.getInt(durationColumn)
 
                 val uri = ContentUris.withAppendedId(collection, id)
 

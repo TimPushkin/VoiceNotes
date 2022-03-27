@@ -52,6 +52,7 @@ fun MainScreen(
             RecordingsList(
                 recordings = applicationState.recordings,
                 nowPlaying = applicationState.nowPlaying,
+                played = applicationState.playerPosition,
                 onElementClick = { uri ->
                     if (applicationState.nowPlaying == uri) onPause()
                     else onPlay(uri)

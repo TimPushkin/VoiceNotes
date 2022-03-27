@@ -14,6 +14,7 @@ import me.timpushkin.voicenotes.models.Recording
 fun RecordingsList(
     recordings: List<Recording>,
     nowPlaying: Uri?,
+    played: Int,
     onElementClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -21,14 +22,17 @@ fun RecordingsList(
         modifier = modifier
     ) {
         items(recordings) { recording ->
+            val isPlaying = recording.uri == nowPlaying
+
             RecordingCard(
                 name = recording.name,
                 date = recording.date,
                 duration = recording.duration,
-                isPlaying = recording.uri == nowPlaying,
+                isPlaying = isPlaying,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
+                played = if (isPlaying) played else 0,
                 onClick = { onElementClick(recording.uri) }
             )
         }
