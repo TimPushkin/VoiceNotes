@@ -78,6 +78,15 @@ class StorageHandler(private val resolver: ContentResolver, subfolder: String) {
         else Log.e(TAG, "Failed to delete $uri")
     }
 
+    fun renameRecording(uri: Uri, name: String) {
+        val fileDetails = ContentValues().apply {
+            put(MediaStore.Audio.Media.DISPLAY_NAME, name + FILE_EXTENSION)
+        }
+        if (resolver.update(uri, fileDetails, null, null) == 1)
+            Log.d(TAG, "Successfully renamed $uri to $name")
+        else Log.e(TAG, "Failed to rename $uri to $name")
+    }
+
     fun getRecordings(): List<Recording> {
         val recordings = mutableListOf<Recording>()
 

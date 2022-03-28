@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
             VoiceNotesTheme {
                 MainScreen(
                     applicationState = applicationState,
+                    onRename = this::rename,
                     onPlay = this::startPlaying,
                     onPause = this::stopPlaying,
                     onStartRecording = this::startRecording,
@@ -92,6 +93,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startPlaying(recording: Recording) {
+        Log.d(TAG, "Attempting to start playing")
+
         if (applicationState.isRecording) audioService?.run {
             stopRecording()
             applicationState.isRecording = false
@@ -117,6 +120,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun stopPlaying() {
+        Log.d(TAG, "Attempting to stop playing")
+
         audioService?.run {
             stopPlaying()
             applicationState.nowPlaying = Recording.EMPTY
@@ -182,6 +187,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun stopRecording() {
+        Log.d(TAG, "Attempting to stop recording")
+
         if (applicationState.isRecording) {
             audioService?.run {
                 stopRecording()
@@ -192,6 +199,14 @@ class MainActivity : ComponentActivity() {
                 }
             } ?: Log.e(TAG, "Cannot stop recording: audio service unavailable")
         } else Log.e(TAG, "Attempted to stop recording when nothing is recording")
+    }
+
+    private fun rename(recording: Recording, name: String) {
+        Log.d(TAG, "Attempting to rename")
+
+        if (applicationState.nowPlaying == recording) stopPlaying()
+        storageHandler.renameRecording(recording.uri, name)
+        applicationState.setRecordingsWith(storageHandler::getRecordings)
     }
 
     private fun checkPermission(permission: String, maxVersion: Int = Int.MAX_VALUE) = when {

@@ -11,4 +11,6 @@
     <string name="audio_service_description">Audio recording and playback</string>
     <string name="recording_playing">Recording is playing</string>
     <string name="audio_service_name">Audio service</string>
+    <string name="rename_recording_caption">New recording name</string>
+    <string name="apply">Apply</string>
 </resources>

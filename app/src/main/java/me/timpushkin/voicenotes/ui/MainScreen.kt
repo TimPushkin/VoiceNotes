@@ -19,6 +19,7 @@ import me.timpushkin.voicenotes.models.Recording
 @Composable
 fun MainScreen(
     applicationState: ApplicationState,
+    onRename: (Recording, String) -> Unit,
     onPlay: (Recording) -> Unit,
     onPause: () -> Unit,
     onStartRecording: () -> Unit,
@@ -71,7 +72,8 @@ fun MainScreen(
                     RecordingsList(
                         recordings = applicationState.recordings.values.toList(),
                         nowPlaying = applicationState.nowPlaying,
-                        onElementClick = { recording ->
+                        onRename = onRename,
+                        onPlay = { recording ->
                             if (applicationState.nowPlaying == recording) onPause()
                             else onPlay(recording)
                         },

@@ -11,4 +11,6 @@
     <string name="audio_service_description">Запись и воспроизведение аудио</string>
     <string name="recording_playing">Запись воспроизводится</string>
     <string name="audio_service_name">Сервис аудио</string>
+    <string name="rename_recording_caption">Новое название</string>
+    <string name="apply">Применить</string>
 </resources>

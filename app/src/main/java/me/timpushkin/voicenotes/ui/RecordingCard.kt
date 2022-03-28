@@ -1,6 +1,7 @@
 package me.timpushkin.voicenotes.ui
 
 import android.text.format.DateUtils
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -9,9 +10,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import me.timpushkin.voicenotes.R
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 
@@ -23,8 +26,11 @@ fun RecordingCard(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
     played: Int = 0,
-    onClick: () -> Unit = {}
+    onRename: (String) -> Unit = {},
+    onPlay: () -> Unit = {}
 ) {
+    var showRenameDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier,
         elevation = 0.dp
@@ -37,7 +43,7 @@ fun RecordingCard(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RecordingTextInfo(name, date, Modifier.weight(1f))
+                RecordingTextInfo(name, date, Modifier.weight(1f)) { showRenameDialog = true }
 
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -45,7 +51,7 @@ fun RecordingCard(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                PlayButton(isPlaying, onClick)
+                PlayButton(isPlaying, onPlay)
             }
 
             LinearProgressIndicator(
@@ -57,13 +63,58 @@ fun RecordingCard(
             )
         }
     }
+
+    if (showRenameDialog) {
+        RenameDialog(
+            initialName = name,
+            onDismiss = { showRenameDialog = false },
+            onApply = { newName ->
+                onRename(newName)
+                showRenameDialog = false
+            }
+        )
+    }
 }
 
 @Composable
-fun RecordingTextInfo(name: String, date: Long, modifier: Modifier = Modifier) {
+fun RenameDialog(
+    initialName: String,
+    onDismiss: () -> Unit,
+    onApply: (String) -> Unit = {}
+) {
+    var name by remember { mutableStateOf(initialName) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = MaterialTheme.shapes.medium) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    label = { Text(stringResource(R.string.rename_recording_caption)) }
+                )
+                Button(
+                    onClick = { if (name != initialName && name.isNotBlank()) onApply(name) },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(stringResource(R.string.apply))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RecordingTextInfo(
+    name: String,
+    date: Long,
+    modifier: Modifier = Modifier,
+    onNameClick: () -> Unit = {}
+) {
     Column(modifier = modifier) {
         Text(
             text = name,
+            modifier = Modifier.clickable(onClick = onNameClick),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.h6
@@ -166,4 +217,13 @@ fun RecordingCardWithLongTitlePreview() {
             played = 7000
         )
     }
+}
+
+@Preview
+@Composable
+fun RenameDialogPreview() {
+    RenameDialog(
+        initialName = "Some name",
+        onDismiss = {}
+    )
 }

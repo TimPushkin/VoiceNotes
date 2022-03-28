@@ -13,7 +13,8 @@ import me.timpushkin.voicenotes.models.Recording
 fun RecordingsList(
     recordings: List<Recording>,
     nowPlaying: Recording,
-    onElementClick: (Recording) -> Unit,
+    onRename: (Recording, String) -> Unit,
+    onPlay: (Recording) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -31,7 +32,8 @@ fun RecordingsList(
                     .fillMaxWidth()
                     .padding(5.dp),
                 played = recording.played,
-                onClick = { onElementClick(recording) }
+                onRename = { name -> onRename(recording, name) },
+                onPlay = { onPlay(recording) }
             )
         }
     }

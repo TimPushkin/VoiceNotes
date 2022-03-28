@@ -35,7 +35,7 @@ class ApplicationState : ViewModel() {
             val newRecordings = mutableMapOf<String, Recording>()
             getRecordings().forEach { recording ->
                 val key = recording.uri.toString()
-                newRecordings[key] = _recordings[key] ?: recording
+                newRecordings[key] = recording.apply { played = _recordings[key]?.played ?: 0 }
             }
             _recordings = newRecordings
         }
