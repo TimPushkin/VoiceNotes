@@ -47,19 +47,21 @@ class AudioService : Service() {
     }
 
     fun startPlaying(
-        recording: Uri,
+        uri: Uri,
+        position: Int,
         onPlayerStarted: () -> Unit = {},
         onPlayerProgress: (Int) -> Unit = {},
         onPlayerCompleted: () -> Unit = {},
         onError: () -> Unit = {}
     ) {
-        Log.d(TAG, "Received request to start playing $recording")
+        Log.d(TAG, "Received request to start playing $uri")
 
-        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.READ)?.let { fd ->
+        storageHandler.uriToFileDescriptor(uri, StorageHandler.Mode.READ)?.let { fd ->
             if (!this::player.isInitialized) player = Player()
 
             player.start(
                 input = fd,
+                position = position,
                 onStarted = {
                     startForeground(FOREGROUND_ID, buildNotification())
                     onPlayerStarted()
@@ -85,24 +87,6 @@ class AudioService : Service() {
         }
     }
 
-    fun pausePlaying() {
-        Log.d(TAG, "Received request to pause playing")
-
-        if (this::player.isInitialized) {
-            player.pause()
-            stopForeground(true)
-        } else Log.e(TAG, "Cannot pause: player not set")
-    }
-
-    fun continuePlaying() {
-        Log.d(TAG, "Received request to continue playing")
-
-        if (this::player.isInitialized) {
-            startForeground(FOREGROUND_ID, buildNotification())
-            player.`continue`()
-        } else Log.e(TAG, "Cannot continue: player not set")
-    }
-
     fun stopPlaying() {
         Log.d(TAG, "Received request to stop playing")
 
@@ -112,14 +96,14 @@ class AudioService : Service() {
         } else Log.e(TAG, "Cannot stop: player not set")
     }
 
-    fun startRecording(recording: Uri): Boolean {
+    fun startRecording(uri: Uri): Boolean {
         Log.d(TAG, "Received request to start recording")
 
-        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.WRITE)?.let { fd ->
+        storageHandler.uriToFileDescriptor(uri, StorageHandler.Mode.WRITE)?.let { fd ->
             if (!this::recorder.isInitialized) recorder = Recorder()
 
             return recorder.start(this, fd).also { started ->
-                if (started) currentRecording = recording
+                if (started) currentRecording = uri
             }
         } ?: Log.e(TAG, "Failed to get a file descriptor from Uri")
 

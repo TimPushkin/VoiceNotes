@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -15,6 +14,7 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import me.timpushkin.voicenotes.models.Recording
 import me.timpushkin.voicenotes.ui.MainScreen
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
 import me.timpushkin.voicenotes.utils.StorageHandler
@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startPlaying(recording: Uri) {
+    private fun startPlaying(recording: Recording) {
         if (applicationState.isRecording) audioService?.run {
             stopRecording()
             applicationState.isRecording = false
@@ -101,12 +101,16 @@ class MainActivity : ComponentActivity() {
         }
 
         audioService?.startPlaying(
-            recording = recording,
+            uri = recording.uri,
+            position = recording.played,
             onPlayerStarted = { applicationState.nowPlaying = recording },
-            onPlayerProgress = applicationState::playerPosition::set,
-            onPlayerCompleted = { applicationState.nowPlaying = null },
+            onPlayerProgress = { applicationState.nowPlaying.played = it },
+            onPlayerCompleted = {
+                applicationState.nowPlaying.played = 0
+                applicationState.nowPlaying = Recording.EMPTY
+            },
             onError = {
-                applicationState.nowPlaying = null
+                applicationState.nowPlaying = Recording.EMPTY
                 applicationState.showSnackbar(resources.getString(R.string.play_failed))
             }
         ) ?: Log.e(TAG, "Cannot start playing: audio service unavailable")
@@ -115,7 +119,7 @@ class MainActivity : ComponentActivity() {
     private fun stopPlaying() {
         audioService?.run {
             stopPlaying()
-            applicationState.nowPlaying = null
+            applicationState.nowPlaying = Recording.EMPTY
         } ?: Log.e(TAG, "Cannot stop playing: audio service unavailable")
     }
 
@@ -131,7 +135,7 @@ class MainActivity : ComponentActivity() {
         if (recordPermission == PermissionStatus.GRANTED && writePermission == PermissionStatus.GRANTED) {
             Log.d(TAG, "All permissions are granted, starting recording")
 
-            if (applicationState.nowPlaying != null) stopPlaying()
+            if (applicationState.nowPlaying != Recording.EMPTY) stopPlaying()
 
             storageHandler.createRecording()?.let { uri ->
                 val started = audioService?.startRecording(uri) ?: run {

@@ -1,11 +1,11 @@
 package me.timpushkin.voicenotes
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.timpushkin.voicenotes.models.Recording
 import me.timpushkin.voicenotes.models.SnackbarContent
@@ -13,17 +13,17 @@ import me.timpushkin.voicenotes.utils.CountingTimer
 
 class ApplicationState : ViewModel() {
     private var timer = CountingTimer()
+    private var ioScope = CoroutineScope(Dispatchers.IO)
 
-    var nowPlaying by mutableStateOf<Uri?>(null)
-    var playerPosition by mutableStateOf(0)
+    var nowPlaying by mutableStateOf(Recording.EMPTY)
     var isRecording by mutableStateOf(false)
 
     private var _recordingTime by mutableStateOf(0L)
     val recordingTime: Long
         get() = _recordingTime
 
-    private var _recordings by mutableStateOf(emptyList<Recording>())
-    val recordings: List<Recording>
+    private var _recordings by mutableStateOf(emptyMap<String, Recording>())
+    val recordings: Map<String, Recording>
         get() = _recordings
 
     private var _snackbarContent by mutableStateOf<SnackbarContentImpl?>(null)
@@ -31,7 +31,14 @@ class ApplicationState : ViewModel() {
         get() = _snackbarContent
 
     fun setRecordingsWith(getRecordings: () -> List<Recording>) {
-        viewModelScope.launch { _recordings = getRecordings() }
+        ioScope.launch {
+            val newRecordings = mutableMapOf<String, Recording>()
+            getRecordings().forEach { recording ->
+                val key = recording.uri.toString()
+                newRecordings[key] = _recordings[key] ?: recording
+            }
+            _recordings = newRecordings
+        }
     }
 
     fun startRecordingTimer() {

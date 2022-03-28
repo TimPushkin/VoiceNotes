@@ -1,6 +1,5 @@
 package me.timpushkin.voicenotes.ui
 
-import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
@@ -15,11 +14,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.timpushkin.voicenotes.ApplicationState
 import me.timpushkin.voicenotes.R
+import me.timpushkin.voicenotes.models.Recording
 
 @Composable
 fun MainScreen(
     applicationState: ApplicationState,
-    onPlay: (Uri) -> Unit,
+    onPlay: (Recording) -> Unit,
     onPause: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit
@@ -69,12 +69,11 @@ fun MainScreen(
                     )
 
                     RecordingsList(
-                        recordings = applicationState.recordings,
+                        recordings = applicationState.recordings.values.toList(),
                         nowPlaying = applicationState.nowPlaying,
-                        played = applicationState.playerPosition,
-                        onElementClick = { uri ->
-                            if (applicationState.nowPlaying == uri) onPause()
-                            else onPlay(uri)
+                        onElementClick = { recording ->
+                            if (applicationState.nowPlaying == recording) onPause()
+                            else onPlay(recording)
                         },
                         modifier = Modifier
                             .padding(top = 10.dp)

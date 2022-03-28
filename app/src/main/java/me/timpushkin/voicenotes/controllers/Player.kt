@@ -20,6 +20,7 @@ class Player {
 
     fun start(
         input: FileDescriptor,
+        position: Int,
         onStarted: () -> Unit = {},
         onCompleted: () -> Unit = {},
         onError: () -> Unit = {}
@@ -43,7 +44,10 @@ class Player {
             )
             setDataSource(fileDescriptor)
             setOnPreparedListener { preparedMediaPlayer ->
-                mediaPlayer = preparedMediaPlayer.apply { start() }
+                mediaPlayer = preparedMediaPlayer.apply {
+                    seekTo(position)
+                    start()
+                }
                 Log.i(TAG, "Started playing from $input")
                 onStarted()
             }
@@ -51,20 +55,6 @@ class Player {
             Log.d(TAG, "Preparing to play from $input")
             prepareAsync()
         }
-    }
-
-    fun pause() {
-        mediaPlayer?.run {
-            pause()
-            Log.d(TAG, "Paused playing from $fileDescriptor")
-        } ?: run { Log.e(TAG, "Failed to pause as MediaPlayer is not set") }
-    }
-
-    fun `continue`() {
-        mediaPlayer?.run {
-            start()
-            Log.d(TAG, "Continued playing from $fileDescriptor")
-        } ?: run { Log.e(TAG, "Failed to continue as MediaPlayer is not set") }
     }
 
     fun stop() {

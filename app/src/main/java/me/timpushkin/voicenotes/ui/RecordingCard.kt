@@ -48,15 +48,13 @@ fun RecordingCard(
                 PlayButton(isPlaying, onClick)
             }
 
-            if (isPlaying) {
-                LinearProgressIndicator(
-                    progress = played.toFloat() / duration,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    backgroundColor = MaterialTheme.colors.surface
-                )
-            }
+            LinearProgressIndicator(
+                progress = played.toFloat() / duration,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                backgroundColor = MaterialTheme.colors.surface
+            )
         }
     }
 }
