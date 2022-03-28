@@ -10,4 +10,5 @@
     <string name="record_failed">Failed to start recording</string>
     <string name="audio_service_description">Audio recording and playback</string>
     <string name="recording_playing">Recording is playing</string>
+    <string name="audio_service_name">Audio service</string>
 </resources>

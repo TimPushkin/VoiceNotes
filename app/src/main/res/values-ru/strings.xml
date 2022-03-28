@@ -10,4 +10,5 @@
     <string name="record_failed">Не удалось начать запись</string>
     <string name="audio_service_description">Запись и воспроизведение аудио</string>
     <string name="recording_playing">Запись воспроизводится</string>
+    <string name="audio_service_name">Сервис аудио</string>
 </resources>

@@ -1,7 +1,10 @@
 package me.timpushkin.voicenotes
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.*
@@ -18,7 +21,7 @@ import me.timpushkin.voicenotes.utils.StorageHandler
 private const val TAG = "AudioService"
 
 private const val FOREGROUND_ID = 1
-private const val NOTIFICATION_CHANNEL = "Audio service"
+private const val NOTIFICATION_CHANNEL = "audio_service"
 
 class AudioService : Service() {
     private val binder = AudioServiceBinder()
@@ -28,6 +31,7 @@ class AudioService : Service() {
     private lateinit var player: Player
     private lateinit var recorder: Recorder
 
+    private var isNotificationChannelCreated = false
     private var currentRecording: Uri? = null
 
     inner class AudioServiceBinder : Binder() {
@@ -47,7 +51,7 @@ class AudioService : Service() {
         onPlayerStarted: () -> Unit = {},
         onPlayerProgress: (Int) -> Unit = {},
         onPlayerCompleted: () -> Unit = {},
-        onPlayerError: () -> Unit = {}
+        onError: () -> Unit = {}
     ) {
         Log.d(TAG, "Received request to start playing $recording")
 
@@ -72,10 +76,13 @@ class AudioService : Service() {
                 },
                 onError = {
                     stopForeground(true)
-                    onPlayerError()
+                    onError()
                 }
             )
-        } ?: Log.e(TAG, "Failed to get a file descriptor from Uri")
+        } ?: run {
+            Log.e(TAG, "Failed to get a file descriptor from Uri")
+            onError()
+        }
     }
 
     fun pausePlaying() {
@@ -108,10 +115,12 @@ class AudioService : Service() {
     fun startRecording(recording: Uri): Boolean {
         Log.d(TAG, "Received request to start recording")
 
-        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.READ)?.let { fd ->
+        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.WRITE)?.let { fd ->
             if (!this::recorder.isInitialized) recorder = Recorder()
 
-            return recorder.start(this, fd)
+            return recorder.start(this, fd).also { started ->
+                if (started) currentRecording = recording
+            }
         } ?: Log.e(TAG, "Failed to get a file descriptor from Uri")
 
         return false
@@ -139,8 +148,21 @@ class AudioService : Service() {
         if (this::recorder.isInitialized && currentRecording != null) stopRecording()
     }
 
-    private fun buildNotification() = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-        .setContentTitle(resources.getString(R.string.recording_playing))
-        .setPriority(NotificationCompat.PRIORITY_LOW)
-        .build()
+    private fun buildNotification(): Notification {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isNotificationChannelCreated) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL,
+                resources.getString(R.string.audio_service_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply { description = resources.getString(R.string.audio_service_description) }
+            val notificationService =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationService.createNotificationChannel(channel)
+        }
+
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+            .setContentTitle(resources.getString(R.string.recording_playing))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
 }

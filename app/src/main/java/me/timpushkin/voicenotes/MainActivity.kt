@@ -1,10 +1,15 @@
 package me.timpushkin.voicenotes
 
 import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
@@ -19,8 +24,6 @@ private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
     private lateinit var applicationState: ApplicationState
     private lateinit var storageHandler: StorageHandler
-
-    private var currentRecording: Uri? = null
 
     private val permissionsRequester =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -39,6 +42,23 @@ class MainActivity : ComponentActivity() {
             else applicationState.showSnackbar(resources.getString(R.string.no_permissions))
         }
 
+    private var audioService: AudioService? = null
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, binder: IBinder) {
+            if (binder is AudioService.AudioServiceBinder) {
+                Log.d(TAG, "Connected to audio service")
+                audioService = binder.service
+            } else Log.e(TAG, "Connected to an unknown service $name")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            if (name.className == AudioService::class.qualifiedName) {
+                Log.w(TAG, "Lost connection to audio service")
+            } else Log.e(TAG, "Lost connection to an unknown service $name")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,6 +69,12 @@ class MainActivity : ComponentActivity() {
         applicationState = ApplicationState().apply {
             setRecordingsWith(storageHandler::getRecordings)
         }
+
+        Log.d(TAG, "Binding to audio service")
+
+        val service = Intent(this, AudioService::class.java)
+        startService(service)
+        bindService(service, serviceConnection, Context.BIND_IMPORTANT)
 
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
@@ -66,17 +92,31 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startPlaying(recording: Uri) {
-        if (applicationState.isRecording) stopRecording()
+        if (applicationState.isRecording) audioService?.run {
+            stopRecording()
+            applicationState.isRecording = false
+        } ?: run {
+            Log.e(TAG, "Cannot stop recording in progress: audio service unavailable")
+            return
+        }
 
-        storageHandler.uriToFileDescriptor(recording, StorageHandler.Mode.READ)?.let { fd ->
-            applicationState.startPlaying(recording, fd) {
+        audioService?.startPlaying(
+            recording = recording,
+            onPlayerStarted = { applicationState.nowPlaying = recording },
+            onPlayerProgress = applicationState::playerPosition::set,
+            onPlayerCompleted = { applicationState.nowPlaying = null },
+            onError = {
+                applicationState.nowPlaying = null
                 applicationState.showSnackbar(resources.getString(R.string.play_failed))
             }
-        }
+        ) ?: Log.e(TAG, "Cannot start playing: audio service unavailable")
     }
 
     private fun stopPlaying() {
-        applicationState.stopPlaying()
+        audioService?.run {
+            stopPlaying()
+            applicationState.nowPlaying = null
+        } ?: Log.e(TAG, "Cannot stop playing: audio service unavailable")
     }
 
     private fun startRecording() {
@@ -94,12 +134,12 @@ class MainActivity : ComponentActivity() {
             if (applicationState.nowPlaying != null) stopPlaying()
 
             storageHandler.createRecording()?.let { uri ->
-                currentRecording = uri
-                storageHandler.uriToFileDescriptor(uri, StorageHandler.Mode.WRITE)?.let { fd ->
-                    applicationState.startRecording(this, fd) {
-                        applicationState.showSnackbar(resources.getString(R.string.record_failed))
-                    }
+                val started = audioService?.startRecording(uri) ?: run {
+                    Log.e(TAG, "Cannot start recording: audio service unavailable")
+                    false
                 }
+                if (!started) applicationState.showSnackbar(resources.getString(R.string.record_failed))
+                applicationState.isRecording = started
             }
 
             return
@@ -137,13 +177,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun stopRecording() {
-        currentRecording?.let { uri ->
-            Log.d(TAG, "Stopping recording")
-            if (applicationState.stopRecording()) {
-                storageHandler.setMetadataFor(uri)
-                applicationState.setRecordingsWith(storageHandler::getRecordings)
-            } else storageHandler.deleteRecording(uri)
-        } ?: run { Log.e(TAG, "Attempted to stop recording when current recording isn't set") }
+        if (applicationState.isRecording) {
+            audioService?.run {
+                stopRecording()
+                applicationState.apply {
+                    isRecording = false
+                    setRecordingsWith(storageHandler::getRecordings)
+                }
+            } ?: Log.e(TAG, "Cannot stop recording: audio service unavailable")
+        } else Log.e(TAG, "Attempted to stop recording when nothing is recording")
     }
 
     private fun checkPermission(permission: String, maxVersion: Int = Int.MAX_VALUE) = when {
