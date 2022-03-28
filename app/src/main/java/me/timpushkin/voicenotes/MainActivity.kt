@@ -138,7 +138,8 @@ class MainActivity : ComponentActivity() {
                     Log.e(TAG, "Cannot start recording: audio service unavailable")
                     false
                 }
-                if (!started) applicationState.showSnackbar(resources.getString(R.string.record_failed))
+                if (started) applicationState.startRecordingTimer()
+                else applicationState.showSnackbar(resources.getString(R.string.record_failed))
                 applicationState.isRecording = started
             }
 
@@ -182,6 +183,7 @@ class MainActivity : ComponentActivity() {
                 stopRecording()
                 applicationState.apply {
                     isRecording = false
+                    stopRecordingTimer()
                     setRecordingsWith(storageHandler::getRecordings)
                 }
             } ?: Log.e(TAG, "Cannot stop recording: audio service unavailable")
