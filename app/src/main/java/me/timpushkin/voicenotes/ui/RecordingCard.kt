@@ -37,7 +37,7 @@ fun RecordingCard(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RecordingTextInfo(name, date)
+                RecordingTextInfo(name, date, Modifier.weight(1f))
 
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -62,8 +62,8 @@ fun RecordingCard(
 }
 
 @Composable
-fun RecordingTextInfo(name: String, date: Long) {
-    Column(modifier = Modifier.fillMaxWidth(0.65f)) {
+fun RecordingTextInfo(name: String, date: Long, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         Text(
             text = name,
             overflow = TextOverflow.Ellipsis,
@@ -84,7 +84,7 @@ fun RecordingTextInfo(name: String, date: Long) {
 }
 
 @Composable
-fun RecordingTimeInfo(duration: Int, played: Int) {
+fun RecordingTimeInfo(duration: Int, played: Int, modifier: Modifier = Modifier) {
     val durationStr = DateUtils.formatElapsedTime(duration.toLong() / 1000)
     val text =
         if (played > 0) "${DateUtils.formatElapsedTime(played.toLong() / 1000)} / $durationStr"
@@ -92,6 +92,7 @@ fun RecordingTimeInfo(duration: Int, played: Int) {
 
     Text(
         text = text,
+        modifier = modifier,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
@@ -99,12 +100,12 @@ fun RecordingTimeInfo(duration: Int, played: Int) {
 }
 
 @Composable
-fun PlayButton(isPlaying: Boolean, onClick: () -> Unit) {
+fun PlayButton(isPlaying: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onClick,
         modifier = Modifier
-            .size(35.dp)
-            .requiredSize(35.dp),
+            .requiredSize(35.dp)
+            .then(modifier),
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = if (isPlaying) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
@@ -147,6 +148,20 @@ fun RecordingCardWhenPlayingPreview() {
     VoiceNotesTheme {
         RecordingCard(
             name = "Title",
+            date = 9999999999999,
+            duration = 10000,
+            isPlaying = true,
+            played = 7000
+        )
+    }
+}
+
+@Preview
+@Composable
+fun RecordingCardWithLongTitlePreview() {
+    VoiceNotesTheme {
+        RecordingCard(
+            name = "A recording with a very long title",
             date = 9999999999999,
             duration = 10000,
             isPlaying = true,
