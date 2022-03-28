@@ -18,7 +18,7 @@ private const val TAG = "StorageHandler"
 
 private const val FILE_EXTENSION = ".aac"
 
-class StorageHandler(private val resolver: ContentResolver, subfolder: String = "") {
+class StorageHandler(private val resolver: ContentResolver, subfolder: String) {
     private val formatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
     private val calendar = Calendar.getInstance()
 

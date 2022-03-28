@@ -8,4 +8,6 @@
     <string name="no_permissions">No permissions to record and save audio. Go to Settings and grant the previously requested permissions.</string>
     <string name="play_failed">Cannot play the recording</string>
     <string name="record_failed">Failed to start recording</string>
+    <string name="audio_service_description">Audio recording and playback</string>
+    <string name="recording_playing">Recording is playing</string>
 </resources>

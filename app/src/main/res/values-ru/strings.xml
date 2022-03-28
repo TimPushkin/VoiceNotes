@@ -8,4 +8,6 @@
     <string name="no_permissions">Нет разрешений, необходимых для записи и хранения аудио. Пройдите в Настройки и дайте ранее отозванные разрешения.</string>
     <string name="play_failed">Невозможно воспроизвести запись</string>
     <string name="record_failed">Не удалось начать запись</string>
+    <string name="audio_service_description">Запись и воспроизведение аудио</string>
+    <string name="recording_playing">Запись воспроизводится</string>
 </resources>

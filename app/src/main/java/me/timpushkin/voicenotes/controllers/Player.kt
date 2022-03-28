@@ -13,6 +13,8 @@ class Player {
     private var mediaPlayer: MediaPlayer? = null
     private var fileDescriptor: FileDescriptor? = null
 
+    val isPlaying: Boolean
+        get() = mediaPlayer?.isPlaying ?: false
     val position: Int
         get() = mediaPlayer?.currentPosition ?: 0
 
