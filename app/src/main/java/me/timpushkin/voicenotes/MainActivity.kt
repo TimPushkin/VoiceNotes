@@ -14,6 +14,10 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.WindowInsetsControllerCompat
 import me.timpushkin.voicenotes.models.Recording
 import me.timpushkin.voicenotes.ui.MainScreen
 import me.timpushkin.voicenotes.ui.theme.VoiceNotesTheme
@@ -80,6 +84,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             VoiceNotesTheme {
+                window.statusBarColor = MaterialTheme.colors.background.toArgb()
+                window.navigationBarColor = MaterialTheme.colors.surface.toArgb()
+
+                if (!isSystemInDarkTheme()) {
+                    WindowInsetsControllerCompat(window, window.decorView).apply {
+                        isAppearanceLightStatusBars = true
+                        isAppearanceLightNavigationBars = true
+                    }
+                }
+
                 MainScreen(
                     applicationState = applicationState,
                     onRename = this::rename,
