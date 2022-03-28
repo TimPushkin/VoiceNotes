@@ -127,7 +127,8 @@ fun RecordingTextInfo(
                 DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME
             ),
             maxLines = 1,
-            style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+            style = MaterialTheme.typography.caption
         )
     }
 }
@@ -144,7 +145,8 @@ fun RecordingTimeInfo(duration: Int, played: Int, modifier: Modifier = Modifier)
         modifier = modifier,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        style = MaterialTheme.typography.caption.run { copy(color = color.copy(alpha = 0.7f)) }
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+        style = MaterialTheme.typography.caption
     )
 }
 
