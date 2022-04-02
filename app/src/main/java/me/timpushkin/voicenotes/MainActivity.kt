@@ -14,6 +14,7 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.toArgb
@@ -26,7 +27,7 @@ import me.timpushkin.voicenotes.utils.StorageHandler
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
-    private lateinit var applicationState: ApplicationState
+    private val applicationState: ApplicationState by viewModels()
     private lateinit var storageHandler: StorageHandler
 
     private val permissionsRequester =
@@ -70,9 +71,8 @@ class MainActivity : ComponentActivity() {
             contentResolver,
             packageManager.getApplicationLabel(applicationInfo).toString()
         )
-        applicationState = ApplicationState().apply {
-            setRecordingsWith(storageHandler::getRecordings)
-        }
+
+        if (applicationState.recordings.isEmpty()) applicationState.setRecordingsWith(storageHandler::getRecordings)
 
         Log.d(TAG, "Binding to audio service")
 
